@@ -1,14 +1,16 @@
 use std::fs;
+use std::num::ParseIntError;
+
+const MOD:u32 = 100;
 
 fn main() {
-    let mut file = fs::read_to_string("day_one_input.txt").expect("AAAAAA");
+    let file = fs::read_to_string("day_one_input.txt").expect("file doens't exist");
     
-    run_day_one(&file);
-    run_day_two(&file);
-    
+    let _ =run_day_one(&file);
+    let _ = run_day_two(&file);    
 }
 
-fn run_day_one(file_info: &str) {
+fn run_day_one(file_info: &str) -> Result<(), ParseIntError> {
 
     let inputs  = file_info.split_whitespace();
     let mut safe = Safe {
@@ -16,20 +18,20 @@ fn run_day_one(file_info: &str) {
     };
     let mut passcode = 0;
     for instruction in inputs {
-        //println!("sections: {instruction:?}");
 
         let (digit, lr):(String, String) = instruction.chars().partition(|c| c.is_digit(10));
-        safe.turn(&digit, &lr);
+        safe.turn(&digit, &lr)?;
         if safe.dial == 0 {
             passcode += 1;
         }
         
     }
     println!("passcode: {passcode}");
+    Ok(())
 
 }
 
-fn run_day_two(file_info: &str) {
+fn run_day_two(file_info: &str) -> Result<(), ParseIntError>{
 
     let inputs = file_info.split_whitespace();
     let mut safe = Safe {
@@ -39,44 +41,44 @@ fn run_day_two(file_info: &str) {
 
     for instruction in inputs {
         let (digit, lr):(String, String) = instruction.chars().partition(|c| c.is_digit(10));
-        let turns = digit.parse::<usize>().unwrap();
+        let turns = digit.parse::<usize>()?;
         let amount = String::from("1");
         for _ in 0..turns {
           
-            safe.turn(&amount, &lr);
+            safe.turn(&amount, &lr)?;
             if safe.dial == 0 {
                 passcode += 1;
             }
         }        
     }
-     println!("passcode tast 2: {passcode}");
+    println!("passcode tast 2: {passcode}");
+    Ok(())
 }
 
 struct Safe {
     dial: u32,
 }
 
+
 impl Safe {
 
-   fn turn (&mut self, amount: &str, direction: &str) {
-    let clicks = amount.parse::<u32>().unwrap() % 100;
-        if direction == "L"{
-            //println!("LEFT ");    
+   fn turn (&mut self, amount: &str, direction: &str) -> Result<(), ParseIntError> {
+
+        let clicks = amount.parse::<u32>()?;
+        let clicks = clicks % MOD;
+        if direction == "L"{    
             if clicks > self.dial {
-                self.dial += 100 - clicks;
+                self.dial += MOD - clicks;
             } else {
                 self.dial -= clicks;
             }
-           // println!("safe pos: {}", self.dial);
         } else {
-           // println!("RIGHT");
             self.dial = self.dial
-                    .checked_add(clicks).expect("WHYYYY");
-            if self.dial >= 100 {
-                self.dial -= 100;
+                    .checked_add(clicks).expect("overflowed on right turn");
+            if self.dial >= MOD {
+                self.dial -= MOD;
             }
-           // println!("safe pos: {}", self.dial);
        }
+       Ok(())
    }
-
 }
