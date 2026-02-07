@@ -21,12 +21,15 @@ fn main() {
     let target_chunks = number_of_threads;//4-8 heuristic for  - CORE dependant heuristic is approx num of cores
     let chunk_size = string_split.range.len() / target_chunks;
 
-    let start = Instant::now();
-    
-    run(string_split, chunk_size, DaySwitch::One);
-    
+    let start = Instant::now();   
+    run(&string_split, chunk_size, DaySwitch::One);    
     let duration = start.elapsed();
-    println!("time: {:?}", duration.as_millis());
+    println!("time task one: {:?}", duration.as_millis());
+
+    let start = Instant::now();   
+    run(&string_split, chunk_size, DaySwitch::Two);    
+    let duration = start.elapsed();
+    println!("time task two: {:?}", duration.as_millis());
 
 }
 
@@ -36,7 +39,7 @@ enum DaySwitch {
     Two,
 }
 
-fn run(full_id: FullId, chunk_size: usize, day_switch: DaySwitch) 
+fn run(full_id: &FullId, chunk_size: usize, day_switch: DaySwitch) 
 {
 
     let result:u64 = thread::scope(|scope| {
