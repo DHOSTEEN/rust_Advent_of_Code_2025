@@ -12,7 +12,7 @@ static MY_REGEX: LazyLock<Regex> =
 fn main() {
 
     let file_string = fs::read_to_string("day_two_input.txt").expect("no file");
-    let string_split = Full_ID::new_ids(&file_string);
+    let string_split = FullId::new_ids(&file_string).unwrap();
 
     let number_of_threads = std::thread::available_parallelism().unwrap().get();
     let target_chunks = number_of_threads;//4-8 heuristic for  - CORE dependant heuristic is approx num of cores
@@ -33,7 +33,6 @@ fn main() {
 
                         count += id.id.parse::<u64>().unwrap();
                     }
-                    
                 }
                 count
             }));
@@ -51,34 +50,31 @@ fn main() {
 }
 
 #[derive(Debug)]
-struct Full_ID {
+struct FullId {
     range: Vec<ID>
 }
 
-impl Full_ID{
-    pub fn new_ids<'a> (all_ids: &'a str) -> Self {
+impl FullId{
+    pub fn new_ids<'a> (all_ids: &'a str) -> Result<Self, ParseIntError> {
 
         let range = all_ids
         .split(',')
-        .flat_map(|raw| {
+        .try_fold(Vec::new(),|mut range, raw| {
             let mut parts = raw.trim().split('-');
 
             let start = parts.next().unwrap().parse::<usize>()?;
             let end   = parts.next().unwrap().parse::<usize>()?;
 
-            Ok::<Vec<ID>, ParseIntError>((start..=end).map(|i| ID::new(i.to_string())).collect::<Vec<_>>())
-        })
-        .collect::<Vec<_>>()
-        .into_iter()
-        .flatten()
-        .collect();
-
-        Full_ID{
+            for num in start..=end {
+                range.push(ID::new(num.to_string()));
+            }
+            Ok(range)
+        })?;
+        
+        Ok(FullId{
             range,
-        }
-       
+        })
     }
-
 }
 #[derive(Debug)]
 struct ID {
