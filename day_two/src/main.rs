@@ -3,8 +3,6 @@ use fancy_regex::Regex;
 use std::thread;
 use std::sync::LazyLock;
 use std::num::ParseIntError;
-use std::error::Error;
-
 
 use std::time::Instant;
 
