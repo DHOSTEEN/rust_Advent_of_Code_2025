@@ -2,24 +2,23 @@ use std::fs;
 use fancy_regex::Regex;
 use std::thread;
 use std::sync::LazyLock;
+use std::num::ParseIntError;
+
+use std::time::Instant;
 
 static MY_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^(\d+)\1$").unwrap());
 
-
-
 fn main() {
 
     let file_string = fs::read_to_string("day_two_input.txt").expect("no file");
-    let string_split = Full_ID::new_IDs(&file_string);
+    let string_split = Full_ID::new_ids(&file_string);
 
     let number_of_threads = std::thread::available_parallelism().unwrap().get();
-    println!("MINE THREADS: {number_of_threads:?}");
-    let target_chunks = number_of_threads;//4-8 heuristic
+    let target_chunks = number_of_threads;//4-8 heuristic for  - CORE dependant heuristic is approx num of cores
     let chunk_size = string_split.range.len() / target_chunks;
 
-    println!("range of list: {:?}\nchunk size: {:?}", string_split.range.len(), chunk_size);
-
+    let start = Instant::now();
     
     let result:u64 = thread::scope(|scope| {
         let chunked = string_split.range.chunks(chunk_size);
@@ -30,8 +29,8 @@ fn main() {
             handles.push(scope.spawn(move || {
                 let mut count = 0;
                 for id in ids {
-                    if id.is_valid() {
-                        println!("{}", id.id);
+                    if let Ok(true) = id.is_valid() {
+
                         count += id.id.parse::<u64>().unwrap();
                     }
                     
@@ -39,7 +38,6 @@ fn main() {
                 count
             }));
         }
-
         handles
             .into_iter()
             .map(|handle| handle.join().unwrap())
@@ -48,9 +46,9 @@ fn main() {
     
          
     println!("{result}");
+    let duration = start.elapsed();
+    println!("time: {:?}", duration.as_millis());
 }
-    //
- 
 
 #[derive(Debug)]
 struct Full_ID {
@@ -58,22 +56,25 @@ struct Full_ID {
 }
 
 impl Full_ID{
-    pub fn new_IDs<'a> (all_ids: &'a str) -> Self {
-        let mut all_ID:Vec<ID> = vec![];
-        for raws in all_ids.split(",") {
-            let raws = raws.trim();
-            let mut raw_split = raws.split("-");
-            let start = raw_split.next().unwrap().parse::<usize>().unwrap();
-            let end = raw_split.next().unwrap().parse::<usize>().unwrap() + 1;
+    pub fn new_ids<'a> (all_ids: &'a str) -> Self {
 
-            for i in start..end {
+        let range = all_ids
+        .split(',')
+        .flat_map(|raw| {
+            let mut parts = raw.trim().split('-');
 
-                all_ID.push(ID::new(i.to_string()));
-            }
-            
-        }
+            let start = parts.next().unwrap().parse::<usize>()?;
+            let end   = parts.next().unwrap().parse::<usize>()?;
+
+            Ok::<Vec<ID>, ParseIntError>((start..=end).map(|i| ID::new(i.to_string())).collect::<Vec<_>>())
+        })
+        .collect::<Vec<_>>()
+        .into_iter()
+        .flatten()
+        .collect();
+
         Full_ID{
-            range: all_ID
+            range,
         }
        
     }
@@ -91,23 +92,7 @@ impl ID {
         }
     }
 
-    fn is_valid(&self) -> bool {
-        
-
-        //println!("{:?} is {}", &self.id.to_string(), Regex::is_match(&rs, &self.id.to_string()).unwrap());
-        //Regex::is_match(&rs, &self.id.to_string()).unwrap()
-        /*if let Some(stuff) = MY_REGEX.find(&self.id.to_string()).unwrap(){
-            let first = &stuff;
-            println!("first val: {:?}", first);
-            //return self.id.to_string().len() == self.length;
-            return true;
-        }
-        
-        false*/
-        match MY_REGEX.find(&self.id).unwrap() {
-            Some(_) => return true,
-            None => return false,
-        }
-
+    fn is_valid(&self) -> Result<bool, fancy_regex::Error> {
+        MY_REGEX.is_match(&self.id)
     }
 }
