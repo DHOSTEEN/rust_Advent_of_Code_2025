@@ -8,30 +8,44 @@ mod error;
 use error::Day2Error;
 
 static DAY_ONE_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(\d+)\1$").unwrap());
+    LazyLock::new(|| Regex::new(r"^(\d+)\1$").expect("regex failed to compile"));
 static DAY_TWO_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^(\d+)\1+$").unwrap());
+    LazyLock::new(|| Regex::new(r"^(\d+)\1+$").expect("regex failed to compile"));
 
-fn main() {
+fn main() -> Result<(), Day2Error>{
 
     let file_string = fs::read_to_string("day_two_input.txt").expect("no file");
-    let string_split = FullId::new_ids(&file_string).unwrap();
-    let number_of_threads = std::thread::available_parallelism().unwrap().get();
-    let target_chunks = number_of_threads;//4-8 heuristic for  - CORE dependant heuristic is approx num of cores
-    let chunk_size = string_split.range.len() / target_chunks;
+
+    let full_ids = FullId::new_ids(&file_string)?;
+    /*let full_ids = match FullId::new_ids(&file_string) {
+        Ok(full_ids) => full_ids,
+        Err(e) => {println!("A? {:?}", e); panic!("{}", e)},
+    };*/
+    let number_of_threads = std::thread::available_parallelism()
+                                .map(|thread_num| thread_num.get())
+                                .unwrap_or(1);
+
+    //number_of_threads * heruistic == target chunks
+    //  4-8 heuristic for I/0  - CORE dependant heuristic is approx num of cores
+    let chunk_size = full_ids.range.len() / number_of_threads;
 
     let start = Instant::now();
 
-    run(&string_split, chunk_size, DaySwitch::One);
- 
+    let day_one_task = run(&full_ids, chunk_size, DaySwitch::One)?;
+    println!("{day_one_task}");
+
     let duration = start.elapsed();
     println!("time task one: {:?}", duration.as_millis());
 
-    let start = Instant::now();   
-    run(&string_split, chunk_size, DaySwitch::Two);    
+    let start = Instant::now();
+
+    let day_two_task = run(&full_ids, chunk_size, DaySwitch::Two)?;
+    println!("{day_two_task}");
+
     let duration = start.elapsed();
     println!("time task two: {:?}", duration.as_millis());
 
+    Ok(())
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -40,7 +54,7 @@ enum DaySwitch {
     Two,
 }
 
-fn run(full_id: &FullId, chunk_size: usize, day_switch: DaySwitch)
+fn run(full_id: &FullId, chunk_size: usize, day_switch: DaySwitch) -> Result<u64, Day2Error>
 {
 
     let result:Result<u64, Day2Error> = thread::scope(|scope| {
@@ -85,9 +99,7 @@ fn run(full_id: &FullId, chunk_size: usize, day_switch: DaySwitch)
 
     });
 
-    println!("{result:?}")
-         
-    
+    result
 }
 
 #[derive(Debug)]

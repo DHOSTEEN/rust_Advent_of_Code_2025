@@ -3,7 +3,7 @@ use std::num::ParseIntError;
 
 #[derive(Debug, Error)]
 pub enum Day2Error {
-    #[error("failed to parse ID AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaa")]
+    #[error("failed to parse ID")]
     ParseID(#[from] ParseIntError),
 
     #[error("fancy regex failed")]
