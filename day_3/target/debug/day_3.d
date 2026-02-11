@@ -1,1 +1,0 @@
-C:\Users\User\eclipse-workspace\RustAdventOfCode2025\day_3\target\debug\day_3.exe: C:\Users\User\eclipse-workspace\RustAdventOfCode2025\day_3\src\error.rs C:\Users\User\eclipse-workspace\RustAdventOfCode2025\day_3\src\main.rs
