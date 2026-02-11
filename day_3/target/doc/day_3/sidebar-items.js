@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["find_two_highest","main","read_lines"],"mod":["error"]};
+window.SIDEBAR_ITEMS = {"constant":["TASK1_BATTERY_NUM","TASK2_BATTERY_NUM"],"fn":["find_highest_in_slice","find_highest_joltage","main","read_lines"],"mod":["error"]};
