@@ -1,20 +1,28 @@
 use itertools::izip;
+
 fn main() {
     let lines = file_reader::read_lines("day4_input.txt").unwrap();
     let mut raws = vec![];
     for line in lines.map_while(Result::ok) {
-        //println!("{}", line);
+        println!("{}", line);
         raws.push(line);
     }
     let grid = Grid::new(raws);
 
     let mut smart_rows = build_smart(&grid);
     count_valid(&smart_rows);
+    println!("\nAAAAAAAAAAAA\n");
+    for x in &grid {
+        println!("{x:?}");
+    }
 
 }
 
 fn count_valid<'a>(rows: &[Row<'a>]) {
     let mut safe_count:u32 = 0;
+    let mut col = 0;
+    let mut row = 0;
+    let mut to_remove = vec![];
     for r in rows {
         let middle:&[u8] = r.middle.unwrap().as_bytes();// will always have a middle due to logic before
         let above = r.above;
@@ -32,6 +40,11 @@ fn count_valid<'a>(rows: &[Row<'a>]) {
                     let (c, s) = count_row_end(m, count);
                     count += c;
                     safe_count += s;
+
+                    if s > 0 {
+                        row = pos;
+                        to_remove.push((col, row));
+                    }
                     //test self
                 }
 
@@ -46,6 +59,8 @@ fn count_valid<'a>(rows: &[Row<'a>]) {
 
                         if count < 4 {
                             safe_count += 1;
+                            row = pos + i;
+                            to_remove.push((col, row));
                         }
                     }
                     
@@ -56,20 +71,28 @@ fn count_valid<'a>(rows: &[Row<'a>]) {
                     let (c, s) = count_row_end(m, count);
                     count += c;
                     safe_count += s;
+                    if s > 0 {
+                        row = pos + 2;
+                        to_remove.push((col, row));
+                    }
                 }
                 
             }
         } else if let None = r.below {// MUST have above
             let my_zip = izip!(middle.windows(3), above.unwrap().as_bytes().windows(3)).enumerate();
             let len = my_zip.len();
-             for (pos, (m, a)) in my_zip {
-                //println!("{:?} -- {:?}", m, a);
 
+            for (pos, (m, a)) in my_zip {
+                //println!("{:?} -- {:?}", m, a);
                 if pos == 0 && m[0] == 64 {
                     let mut count = count_row_slice(a, 0);
                     let (c, s) = count_row_end(m, count);
                     count += c;
                     safe_count += s;
+                    if s > 0 {
+                        row = pos;
+                        to_remove.push((col, row));
+                    }
                 }
                 for i in 0..m.len() {
 
@@ -80,6 +103,10 @@ fn count_valid<'a>(rows: &[Row<'a>]) {
 
                         if count < 4 {
                             safe_count += 1;
+
+                            row = pos + i;
+                            to_remove.push((col, row));
+      
                         }
                     }
                 }
@@ -88,9 +115,15 @@ fn count_valid<'a>(rows: &[Row<'a>]) {
                     let (c, s) = count_row_end(m, count);
                     count += c;
                     safe_count += s;
+                    if s > 0 {
+                        row = pos + 2;
+                        to_remove.push((col, row));
+                    }
                 }
+            
             }
-        }else {
+
+        } else {
             let my_zip = izip!(
                     middle.windows(3),
                     above.unwrap().as_bytes().windows(3),
@@ -104,6 +137,10 @@ fn count_valid<'a>(rows: &[Row<'a>]) {
                     let (c, s) = count_row_end(m, count);
                     count += c;
                     safe_count += s;
+                    if s > 0 {
+                        row = pos;
+                        to_remove.push((col, row));
+                    }
                 }
                 for i in 0..m.len() {
 
@@ -114,26 +151,41 @@ fn count_valid<'a>(rows: &[Row<'a>]) {
                         count += count_neighbours(m);
                         if count < 4 {
                             safe_count += 1;
+                            
+                            row = pos + i;
+                            to_remove.push((col, row));
+                            
                         }
 
                     }
                 }//correct 
                 
                 if pos == len -1 && m[2] == 64 {
+
                     let mut count = count_row_slice(a, 2);
                     count += count_row_slice(b,2);
                     let (c, s) = count_row_end(m, count);
                     count += c;
+                    if s > 0 {
+                        row = pos + 2;
+                        to_remove.push((col, row));
+                    }
                     safe_count += s;
                 }
                 //println!("{:?} -- {:?} -- {:?}", a, m, b);
             }
         }
+        col += 1;
 
     }
     println!("row count: {safe_count}");
+    for rem in to_remove {
+        println!("{:?}", rem);
+    }
+    //
+    // 0@1@2@3@4@5.6x7.8@9@
 }
-
+///this function needs to sanitise the start and end of the slice in order to deal with the start and end of a line
 fn count_row_slice(row_slice: &[u8], i:usize) -> u32{
     let mut count = 0;
     let start = i.saturating_sub(1);
