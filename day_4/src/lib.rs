@@ -1,4 +1,6 @@
 use itertools::izip;
+mod error;
+use error::Day4Error;
 
 const ABOVE:usize = 0;
 const MIDDLE:usize = 1;
@@ -60,12 +62,16 @@ impl<'a> Row<'a> {
     }
 }
 
-pub fn build_smart<'a>(grid: &'a Grid) -> Vec<Row<'a>> {
+pub fn build_smart<'a>(grid: &'a Grid) -> Result<Vec<Row<'a>>, Day4Error> {
 
     let mut smart_rows = vec![];
+
+    //add start of rows - no above row
     let mut iter = grid.into_iter();
-    let mut smart_row = Row::build(&iter.next().unwrap()[..]);
-    smart_row.add_below(&iter.next().unwrap()[..]);
+    let middle_row = iter.next().ok_or(Day4Error::NoLine)?;
+    let mut smart_row = Row::build(middle_row);
+    let below_row = iter.next().ok_or(Day4Error::NoLine)?;
+    smart_row.add_below(below_row);
     smart_rows.push(smart_row);
 
     let mut buffer:[&str;2] = ["";2];
@@ -85,15 +91,18 @@ pub fn build_smart<'a>(grid: &'a Grid) -> Vec<Row<'a>> {
         counter += 1;
     }
 
-    //need to add last row as middle, below None
+    //need to add last row as middle, below stays as None
     let mut rev_iter = grid.into_iter().rev();
-    let mut smart_row = Row::build(&rev_iter.next().unwrap()[..]);
-    smart_row.add_above(&rev_iter.next().unwrap()[..]);
+    let middle_row = rev_iter.next().ok_or(Day4Error::NoLine)?;
+    let mut smart_row = Row::build(middle_row);
+    let above_row = rev_iter.next().ok_or(Day4Error::NoLine)?;
+    smart_row.add_above(above_row);
     smart_rows.push(smart_row);
 
-    smart_rows
+    Ok(smart_rows)
 }
 
+///all rows have been validated to contain a Some when Row was built
 pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
     let mut safe_count:u32 = 0;
     let mut col = 0;

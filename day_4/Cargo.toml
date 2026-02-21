@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 file_reader = { path = "../file_reader" }
 itertools = "0.14.0"
+thiserror.workspace = true
