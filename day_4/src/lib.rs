@@ -108,11 +108,11 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
         if let None = r.above {//then it MUST be below
             let my_zip = izip!(middle.windows(3), below.unwrap().as_bytes().windows(3)).enumerate();
             let len = my_zip.len();
-            for (pos,(m,b)) in my_zip {
+            for (pos,(middle_row, below_row)) in my_zip {
                 //explicity test first and last
-                if pos == 0 && m[LEFT] == TARGET {
-                    let mut count = count_row_slice(b, LEFT);
-                    let (c, s) = count_row_end(m, count);
+                if pos == 0 && middle_row[LEFT] == TARGET {
+                    let mut count = count_row_slice(below_row, LEFT);
+                    let (c, s) = count_row_end(middle_row, count);
                     count += c;
                     safe_count += s;
 
@@ -121,13 +121,13 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
                         to_remove.push((col, row));
                     }
                 }
-                if m[MIDDLE] == TARGET {
+                if middle_row[MIDDLE] == TARGET {
                     let mut count = 0;
                     //println!("the i pos is {i}");
                     //check below in i, i-1, i+1
-                    count += count_row_slice(b, MIDDLE);
+                    count += count_row_slice(below_row, MIDDLE);
 
-                    count += count_neighbours(m);
+                    count += count_neighbours(middle_row);
 
                     if count < 4 {
                         safe_count += 1;
@@ -136,9 +136,9 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
                     }
                 }
                     
-                if pos == len -1 && m[RIGHT] == TARGET {
-                    let mut count = count_row_slice(b, RIGHT);
-                    let (c, s) = count_row_end(m, count);
+                if pos == len -1 && middle_row[RIGHT] == TARGET {
+                    let mut count = count_row_slice(below_row, RIGHT);
+                    let (c, s) = count_row_end(middle_row, count);
                     count += c;
                     safe_count += s;
                     if s > 0 {
@@ -152,11 +152,11 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
             let my_zip = izip!(middle.windows(3), above.unwrap().as_bytes().windows(3)).enumerate();
             let len = my_zip.len();
 
-            for (pos, (m, a)) in my_zip {
+            for (pos, (middle_row, above_row)) in my_zip {
                 //println!("{:?} -- {:?}", m, a);
-                if pos == 0 && m[LEFT] == TARGET {
-                    let mut count = count_row_slice(a, LEFT);
-                    let (c, s) = count_row_end(m, count);
+                if pos == 0 && middle_row[LEFT] == TARGET {
+                    let mut count = count_row_slice(above_row, LEFT);
+                    let (c, s) = count_row_end(middle_row, count);
                     count += c;
                     safe_count += s;
                     if s > 0 {
@@ -164,10 +164,10 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
                         to_remove.push((col, row));
                     }
                 }
-                if m[MIDDLE] == TARGET {
-                    let mut count = count_row_slice(a, MIDDLE);
+                if middle_row[MIDDLE] == TARGET {
+                    let mut count = count_row_slice(above_row, MIDDLE);
                 
-                    count += count_neighbours(m);
+                    count += count_neighbours(middle_row);
 
                     if count < 4 {
                         safe_count += 1;
@@ -177,9 +177,9 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
     
                     }
                 }
-                if pos == len -1 && m[RIGHT] == TARGET {
-                    let mut count = count_row_slice(a, RIGHT);
-                    let (c, s) = count_row_end(m, count);
+                if pos == len -1 && middle_row[RIGHT] == TARGET {
+                    let mut count = count_row_slice(above_row, RIGHT);
+                    let (c, s) = count_row_end(middle_row, count);
                     count += c;
                     safe_count += s;
                     if s > 0 {
@@ -194,12 +194,12 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
                     above.unwrap().as_bytes().windows(3),
                     below.unwrap().as_bytes().windows(3));
             let len = my_zip.len();
-            for (pos,(m,a,b)) in my_zip.enumerate() {
+            for (pos,(middle_row, above_row, below_row)) in my_zip.enumerate() {
 
-                if pos == 0 && m[LEFT] == TARGET{
-                    let mut count = count_row_slice(a, LEFT);
-                    count += count_row_slice(b, LEFT);
-                    let (c, s) = count_row_end(m, count);
+                if pos == 0 && middle_row[LEFT] == TARGET{
+                    let mut count = count_row_slice(above_row, LEFT);
+                    count += count_row_slice(below_row, LEFT);
+                    let (c, s) = count_row_end(middle_row, count);
                     count += c;
                     safe_count += s;
                     if s > 0 {
@@ -207,11 +207,11 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
                         to_remove.push((col, row));
                     }
                 }
-                if m[MIDDLE] == TARGET {//huh can hard code...
+                if middle_row[MIDDLE] == TARGET {//huh can hard code...
 
-                    let mut count = count_row_slice(a, MIDDLE);
-                    count += count_row_slice(b, MIDDLE);
-                    count += count_neighbours(m);
+                    let mut count = count_row_slice(above_row, MIDDLE);
+                    count += count_row_slice(below_row, MIDDLE);
+                    count += count_neighbours(middle_row);
                     if count < 4 {
                         safe_count += 1;
                         
@@ -220,11 +220,11 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
                         
                     }
                 }       
-                if pos == len -1 && m[RIGHT] == TARGET {
+                if pos == len -1 && middle_row[RIGHT] == TARGET {
 
-                    let mut count = count_row_slice(a, RIGHT);
-                    count += count_row_slice(b, RIGHT);
-                    let (c, s) = count_row_end(m, count);
+                    let mut count = count_row_slice(above_row, RIGHT);
+                    count += count_row_slice(below_row, RIGHT);
+                    let (c, s) = count_row_end(middle_row, count);
                     count += c;
                     if s > 0 {
                         row = pos + RIGHT;
@@ -241,10 +241,10 @@ pub fn count_valid<'a>(rows: &[Row<'a>]) -> (Vec<(usize, usize)>, u32) {
     (to_remove, safe_count)
 }
 ///this function needs to sanitise the start and end of the slice in order to deal with the start and end of a line
-fn count_row_slice(row_slice: &[u8], i:usize) -> u32 {
+fn count_row_slice(row_slice: &[u8], index:usize) -> u32 {
     let mut count = 0;
-    let start = i.saturating_sub(1);
-    let end = (i + 1).min(row_slice.len() - 1);
+    let start = index.saturating_sub(1);
+    let end = (index + 1).min(row_slice.len() - 1);
     for &ch in &row_slice[start..=end] {
         if ch == TARGET {
             count += 1;
