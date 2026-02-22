@@ -1,0 +1,9 @@
+[package]
+name = "day_5"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+file_reader = { version = "0.1.0", path = "../file_reader" }
+itertools = "0.14.0"
+thiserror.workspace = true
