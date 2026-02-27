@@ -1,0 +1,9 @@
+[package]
+name = "day_6"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow.workspace = true
+file_reader = { version = "0.1.0", path = "../file_reader" }
+thiserror.workspace = true
