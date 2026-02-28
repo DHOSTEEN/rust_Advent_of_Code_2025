@@ -4,27 +4,31 @@ use day_6::Day6Error;
 
 pub fn line_parseing(
     line: &str,
-    all_cols: &mut Vec<Colum>,
-    col_width: usize,
+    all_cols: &mut Vec<Colum>
 ) -> Result<(), Day6Error> {
-    if line.starts_with("+") || line.starts_with("*") {
-        task_one::parse_symbols(line, all_cols)?;
-    } else {
-        for (i, bytes) in line.as_bytes().chunks(col_width + 1).enumerate() {
-            let nth = all_cols.get_mut(i);
-            if let Some(col) = nth {
-                let raw_num = std::str::from_utf8(bytes)?;
-                //col.add_num(&raw_num)?;
-                col.add_string(raw_num);
-            } else {
-                let mut col = Colum::default();
-                let raw_num = std::str::from_utf8(bytes)?;
-                //col.add_num(&raw_num)?;
-                col.add_string(raw_num);
-                all_cols.push(col);
+ 
+  
+    for (i, bytes) in line.chars().enumerate() {
+       
+        let nth = all_cols.get_mut(i);
+        if let Some(col) = nth {
+    
+            let raw_num = bytes.to_string();
+            if raw_num == "*" || raw_num == "+" {
+                col.add_symbol(&raw_num)?;
+            } else{
+            //col.add_num(&raw_num)?;
+                col.add_string(&raw_num);
             }
+        } else {
+            let mut col = Colum::default();
+            let raw_num = bytes.to_string();
+            //col.add_num(&raw_num)?;
+            col.add_string(&raw_num);
+            all_cols.push(col);
         }
     }
+
     Ok(())
 }
 

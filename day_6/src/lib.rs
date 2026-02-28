@@ -23,6 +23,15 @@ impl Colum {
         self.string_raws.push(raw_num.to_owned());
     }
     pub fn add_symbol(&mut self, symbol: &str) -> Result<(), Day6Error> {
+        let mut symbol = symbol.trim();
+        if symbol.len() > 1 {
+            if symbol.contains("*") {
+                symbol = "*";
+            } else {
+                symbol = "+";
+            }
+        }
+        println!("{symbol}");
         use OperationSymbol::*;
         match symbol {
             "+" => {
@@ -49,32 +58,20 @@ impl Colum {
             None => 0,
         }
     }
-    pub fn caculate_t2(&mut self) -> u64 {
+    pub fn caculate_t2(&self) -> Result<(Option<u64>, Option<OperationSymbol>), Day6Error> {
         let mut string_num: Vec<String> = Vec::with_capacity(self.numbers.len());
 
         //println!("before mutation: {:?}", self.numbers);
-        //println!("before string: {:?}", self.string_raws);
-
-        let width = self.string_raws[0].len();
-
-        // Preallocate all columns
-        let mut columns: Vec<String> = (0..width)
-            .map(|_| String::with_capacity(self.string_raws.len()))
-            .collect();
-
-        for row in &self.string_raws {
-            for (col_idx, b) in row.bytes().rev().enumerate() {
-                if b != b' ' {
-                    columns[col_idx].push(b as char);
-                }
-            }
+        println!("before string: {:?}", self.string_raws);
+        println!("symbol: {:?}", self.symbol );
+        
+        let num= self.string_raws.concat();
+        let num = num.trim();
+        println!("collected: {num}");
+        if num.is_empty() {
+           return Ok((None, self.symbol))
         }
-
-        self.numbers = columns
-            .into_iter()
-            .filter_map(|s| s.parse::<u64>().ok())
-            .collect();
-        //println!("after mutation: {:?}", self.numbers);
-        self.caculate()
+        let num:u64 = num.parse()?;
+        Ok((Some(num), self.symbol))
     }
 }
