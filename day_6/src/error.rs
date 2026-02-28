@@ -1,4 +1,4 @@
-use std::{io, num::ParseIntError};
+use std::{io, num::ParseIntError, str::Utf8Error};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -9,4 +9,6 @@ pub enum Day6Error {
     NumParse(#[from] ParseIntError),
     #[error("failed to find suitable symbol")]
     NoSymbol,
+    #[error("byte chunks failed to parse to string")]
+    ByteError(#[from] Utf8Error),
 }
