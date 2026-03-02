@@ -71,6 +71,7 @@ impl Colum {
         if num.is_empty() {
            return Ok((None, self.symbol))
         }
+        println!("before parse: {:?}", num);
         let num:u64 = num.parse()?;
         Ok((Some(num), self.symbol))
     }
