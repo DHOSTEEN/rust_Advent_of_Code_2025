@@ -74,6 +74,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "day_7"
+version = "0.1.0"
+dependencies = [
+ "file_reader",
+ "thiserror",
+]
+
+[[package]]
 name = "day_one"
 version = "0.1.0"
 
