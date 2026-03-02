@@ -8,12 +8,10 @@ pub fn line_parseing(line: &str, all_cols: &mut Vec<Colum>) -> Result<(), Day6Er
             let nth = all_cols.get_mut(i);
             if let Some(col) = nth {
                 col.add_num(num)?;
-                //col.add_string(raw_num);
             } else {
                 let mut col = Colum::default();
 
                 col.add_num(num)?;
-                //col.add_string(raw_num);
                 all_cols.push(col);
             }
         }

@@ -19,8 +19,8 @@ impl Colum {
         self.numbers.push(num);
         Ok(())
     }
-    pub fn add_string(&mut self, raw_num: &str) {
-        self.string_raws.push(raw_num.to_owned());
+    pub fn add_string(&mut self, raw_num: String) {
+        self.string_raws.push(raw_num);
     }
     pub fn add_symbol(&mut self, symbol: &str) -> Result<(), Day6Error> {
         let mut symbol = symbol.trim();
@@ -31,7 +31,7 @@ impl Colum {
                 symbol = "+";
             }
         }
-        println!("{symbol}");
+        //println!("{symbol}");
         use OperationSymbol::*;
         match symbol {
             "+" => {
@@ -62,7 +62,7 @@ impl Colum {
         self.numbers = Vec::with_capacity(self.string_raws.len());
 
         for raws in self.string_raws.iter() {
-            let num:u64 = raws.parse()?;
+            let num: u64 = raws.parse()?;
             self.numbers.push(num);
         }
 
