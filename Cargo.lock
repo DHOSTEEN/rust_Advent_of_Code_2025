@@ -77,6 +77,7 @@ dependencies = [
 name = "day_7"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "file_reader",
  "thiserror",
 ]
