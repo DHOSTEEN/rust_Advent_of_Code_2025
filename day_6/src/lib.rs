@@ -58,21 +58,15 @@ impl Colum {
             None => 0,
         }
     }
-    pub fn caculate_t2(&self) -> Result<(Option<u64>, Option<OperationSymbol>), Day6Error> {
-        let mut string_num: Vec<String> = Vec::with_capacity(self.numbers.len());
+    pub fn caculate_t2(&mut self) -> Result<u64, Day6Error> {
+        self.numbers = Vec::with_capacity(self.string_raws.len());
+
+        for raws in self.string_raws.iter() {
+            let num:u64 = raws.parse()?;
+            self.numbers.push(num);
+        }
 
         //println!("before mutation: {:?}", self.numbers);
-        println!("before string: {:?}", self.string_raws);
-        println!("symbol: {:?}", self.symbol );
-        
-        let num= self.string_raws.concat();
-        let num = num.trim();
-        println!("collected: {num}");
-        if num.is_empty() {
-           return Ok((None, self.symbol))
-        }
-        println!("before parse: {:?}", num);
-        let num:u64 = num.parse()?;
-        Ok((Some(num), self.symbol))
+        Ok(self.caculate())
     }
 }

@@ -5,10 +5,11 @@ use day_6::{Colum, OperationSymbol};
 mod task_one;
 mod task_two;
 fn main() -> Result<()> {
-    let file = file_reader::read_lines("day6_test.txt")?;
+    let file = file_reader::read_lines("day6_input.txt")?;
 
     let mut all_cols_task_one: Vec<Colum> = Vec::new();
     let mut all_rows_task_two: Vec<Vec<char>> = Vec::new();
+    let mut all_cols_task_two: Vec<Colum> = Vec::new();
 
     for line in file.map_while(Result::ok) {
 
@@ -22,13 +23,16 @@ fn main() -> Result<()> {
         }
         all_rows_task_two.push(row);
     }
-    task_two::line_parseing(&all_rows_task_two)?;
+    let mut all_cols = task_two::line_parseing(&all_rows_task_two)?;
 
-    // for all in all_cols {
-    //     println!("{:?}", all);
-    // }
+    for all in all_cols.iter() {
+        println!("{:?}", all);
+    }
 
     let result: u64 = all_cols_task_one.iter().map(|col| col.caculate()).sum();
+    println!("{result:?}");
+
+    let result: u64 = all_cols.iter_mut().map(|col| col.caculate_t2().unwrap()).sum();
     println!("{result:?}");
 
     Ok(())
