@@ -23,16 +23,8 @@ impl Colum {
         self.string_raws.push(raw_num);
     }
     pub fn add_symbol(&mut self, symbol: &str) -> Result<(), Day6Error> {
-        let mut symbol = symbol.trim();
-        if symbol.len() > 1 {
-            if symbol.contains("*") {
-                symbol = "*";
-            } else {
-                symbol = "+";
-            }
-        }
-        //println!("{symbol}");
         use OperationSymbol::*;
+        
         match symbol {
             "+" => {
                 self.symbol = Some(Plus);

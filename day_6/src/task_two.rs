@@ -18,7 +18,7 @@ pub fn line_parseing(rows: &[Vec<char>]) -> Result<Vec<Colum>, Day6Error> {
         let mut concat_num = String::new();
         for elem in c.iter() {
             if *elem == '+' || *elem == '*' {
-                fat_col.add_symbol(&elem.to_string())?;
+                fat_col.add_symbol(&elem.to_string())?;//to use same method as task one
                 fat_col.add_string(concat_num);
                 all_cols.push(fat_col);
 
